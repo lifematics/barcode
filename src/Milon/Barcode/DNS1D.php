@@ -464,6 +464,10 @@ class DNS1D {
                     $arrcode = $this->barcode_codabar($code);
                     break;
                 }
+	    case 'NW7': {
+		    $arrcode = $this->barcode_nw7($code);
+		    break;
+	        }
             case 'CODE11': { // CODE 11
                     $arrcode = $this->barcode_code11($code);
                     break;
@@ -1972,6 +1976,64 @@ class DNS1D {
                 $bararray['maxw'] += $w;
                 ++$k;
             }
+        }
+        return $bararray;
+    }
+	
+   /**
+     * NW-7 barcodes.
+     * @param $code (string) code to represent.
+     * @return array barcode representation.
+     * @protected
+     */
+    protected function barcode_nw7($code) {
+        $chr = array(
+            '0' => '1111122',
+            '1' => '1111221',
+            '2' => '1112112',
+            '3' => '2211111',
+            '4' => '1121121',
+            '5' => '2111121',
+            '6' => '1211112',
+            '7' => '1211211',
+            '8' => '1221111',
+            '9' => '2112111',
+            '-' => '1112211',
+            '$' => '1122111',
+            ':' => '2111212',
+            '/' => '2121112',
+            '.' => '2121211',
+            '+' => '1122222',
+            'A' => '1122121',
+            'B' => '1212112',
+            'C' => '1112122',
+            'D' => '1112221'
+        );
+        $bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 1, 'bcode' => array());
+        $k = 0;
+        $w = 0;
+        $seq = '';
+        $code = 'A' . strtoupper($code) . 'A';
+        $len = strlen($code);
+        for ($i = 0; $i < $len; ++$i) {
+            if (!isset($chr[$code[$i]])) {
+                return false;
+            }
+            $seq = $chr[$code[$i]];
+            for ($j = 0; $j < 7; ++$j) {
+                if (($j % 2) == 0) {
+                    $t = true; // bar
+                } else {
+                    $t = false; // space
+                }
+                $w = $seq[$j];
+                $bararray['bcode'][$k] = array('t' => $t, 'w' => $w, 'h' => 1, 'p' => 0);
+                $bararray['maxw'] += $w;
+                ++$k;
+            }
+            $bararray['bcode'][$k] = array('t' => false, 'w' => 2, 'h' => 1, 'p' => 0);
+            $bararray['maxw'] += 2;
+            ++$k;		
         }
         return $bararray;
     }
